@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   TextInput,
   Keyboard,
-  Alert,
 } from 'react-native';
 import React, { useState } from 'react';
 import api from './services/api';
@@ -19,28 +18,19 @@ export default function App() {
   const [Estado, setEstado] = useState('');
 
   async function Carregar() {
-    try {
       let response = await api.get(`${url}/json`);
       let { cep, localidade, bairro, logradouro, estado } = response.data;
-      if (!cep) {
-        Alert.alert('[ERROR], Digite um outro valor');
-        return;
-      }
       setCEP(cep);
       setLog(logradouro);
       setCidade(localidade);
       setBairro(bairro);
       setEstado(estado);
       Keyboard.dismiss();
-    } catch (error) {
-      Alert.alert('[ERROR]', 'CEP inválido ou erro de conexão');
-    }
   }
 
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Digite o CEP desejado</Text>
-      <Text style={styles.titulo}>{cidade}</Text>
       <TextInput
         keyboardType="numeric"
         maxLength={8}
