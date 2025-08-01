@@ -4,6 +4,8 @@ import {
   StyleSheet,
   TouchableOpacity,
   TextInput,
+  Keyboard,
+  Alert,
 } from 'react-native';
 import React, { useState } from 'react';
 import api from './services/api';
@@ -17,22 +19,31 @@ export default function App() {
   const [Estado, setEstado] = useState('');
 
   async function Carregar() {
-    let response = await api.get(`${url}/json`);
-    let {cep, localidade, bairro, logradouro, estado} = response.data;
-
-    setCEP(cep);
-    setLog(logradouro);
-    setCidade(localidade);
-    setBairro(bairro);
-    setEstado(estado);
-    
+    try {
+      let response = await api.get(`${url}/json`);
+      let { cep, localidade, bairro, logradouro, estado } = response.data;
+      if (!cep) {
+        Alert.alert('[ERROR], Digite um outro valor');
+        return;
+      }
+      setCEP(cep);
+      setLog(logradouro);
+      setCidade(localidade);
+      setBairro(bairro);
+      setEstado(estado);
+      Keyboard.dismiss();
+    } catch (error) {
+      Alert.alert('[ERROR]', 'CEP inválido ou erro de conexão');
+    }
   }
 
   return (
     <View style={styles.container}>
-      <Text style={styles.titulo}>Digite o CPF desejado</Text>
+      <Text style={styles.titulo}>Digite o CEP desejado</Text>
       <Text style={styles.titulo}>{cidade}</Text>
       <TextInput
+        keyboardType="numeric"
+        maxLength={8}
         style={styles.input}
         placeholder="Ex:79003144"
         value={url}
@@ -51,13 +62,13 @@ export default function App() {
         </TouchableOpacity>
       </View>
 
-          <View style={styles.areaBusca}>
-            <Text style={styles.textoLocal}>CEP: {CEP}</Text>
-            <Text style={styles.textoLocal}>Logradouro: {log}</Text>
-            <Text style={styles.textoLocal}>Bairro: {Bairro}</Text>
-            <Text style={styles.textoLocal}>Cidade: {cidade}</Text>
-            <Text style={styles.textoLocal}>Estado: {Estado}</Text> 
-          </View>
+      <View style={styles.areaBusca}>
+        <Text style={styles.textoLocal}>CEP: {CEP}</Text>
+        <Text style={styles.textoLocal}>Logradouro: {log}</Text>
+        <Text style={styles.textoLocal}>Bairro: {Bairro}</Text>
+        <Text style={styles.textoLocal}>Cidade: {cidade}</Text>
+        <Text style={styles.textoLocal}>Estado: {Estado}</Text>
+      </View>
     </View>
   );
 }
@@ -107,7 +118,7 @@ const styles = StyleSheet.create({
     marginLeft: 30,
     borderRadius: 5,
   },
-  areaBusca:{
+  areaBusca: {
     width: '90%',
     justifyContent: 'center',
     alignItems: 'center',
@@ -115,6 +126,6 @@ const styles = StyleSheet.create({
   },
   textoLocal: {
     fontSize: 18,
-    fontWeight: 'bold',  
+    fontWeight: 'bold',
   },
 });
