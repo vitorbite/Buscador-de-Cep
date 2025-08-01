@@ -25,7 +25,7 @@ export default function App() {
     setCidade(localidade);
     setBairro(bairro);
     setEstado(estado);
-    setModal(true);
+    
   }
 
   return (
