@@ -5,25 +5,59 @@ import {
   TouchableOpacity,
   TextInput,
 } from 'react-native';
-import React from 'react';
+import React, { useState } from 'react';
+import api from './services/api';
 
 export default function App() {
+  const [url, setUrl] = useState('');
+  const [CEP, setCEP] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [log, setLog] = useState('');
+  const [Bairro, setBairro] = useState('');
+  const [Estado, setEstado] = useState('');
+
+  async function Carregar() {
+    let response = await api.get(`${url}/json`);
+    let {cep, localidade, bairro, logradouro, estado} = response.data;
+
+    setCEP(cep);
+    setLog(logradouro);
+    setCidade(localidade);
+    setBairro(bairro);
+    setEstado(estado);
+    setModal(true);
+  }
+
   return (
     <View style={styles.container}>
       <Text style={styles.titulo}>Digite o CPF desejado</Text>
-      <TextInput style={styles.input} placeholder='Ex:79003144'/>
+      <Text style={styles.titulo}>{cidade}</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="Ex:79003144"
+        value={url}
+        onChangeText={v => {
+          setUrl(v);
+        }}
+      />
 
       <View style={styles.areaBtn}>
-      
-        <TouchableOpacity style={styles.buscar}>
+        <TouchableOpacity style={styles.buscar} onPress={Carregar}>
           <Text style={styles.btn}>Buscar</Text>
         </TouchableOpacity>
-        
+
         <TouchableOpacity style={styles.limpar}>
           <Text style={styles.btn}>Limpar</Text>
         </TouchableOpacity>
-      
       </View>
+
+          <View style={styles.areaBusca}>
+            <Text style={styles.textoLocal}>CEP: {CEP}</Text>
+            <Text style={styles.textoLocal}>Logradouro: {log}</Text>
+            <Text style={styles.textoLocal}>Bairro: {Bairro}</Text>
+            <Text style={styles.textoLocal}>Cidade: {cidade}</Text>
+            <Text style={styles.textoLocal}>Estado: {Estado}</Text> 
+          </View>
     </View>
   );
 }
@@ -33,13 +67,13 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
   },
-  titulo:{
+  titulo: {
     fontSize: 22,
     fontWeight: 'bold',
     textAlign: 'center',
     marginTop: 30,
   },
-  input:{
+  input: {
     width: '90%',
     height: 50,
     borderWidth: 2,
@@ -55,7 +89,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 10,
   },
-  btn:{
+  btn: {
     fontSize: 16,
     textAlign: 'center',
     verticalAlign: 'middle',
@@ -63,15 +97,24 @@ const styles = StyleSheet.create({
     width: 100,
     height: 40,
   },
-  buscar:{
+  buscar: {
     backgroundColor: 'blue',
     marginRight: 30,
     borderRadius: 5,
   },
-  limpar:{
+  limpar: {
     backgroundColor: 'red',
     marginLeft: 30,
     borderRadius: 5,
   },
-
+  areaBusca:{
+    width: '90%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 100,
+  },
+  textoLocal: {
+    fontSize: 18,
+    fontWeight: 'bold',  
+  },
 });
