@@ -6,12 +6,14 @@ import {
   TextInput,
   Keyboard,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import api from './services/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function App() {
+  let [loading, setLoading] = useState(true);
   const [url, setUrl] = useState('');
   const [CEP, setCEP] = useState('');
   const [cidade, setCidade] = useState('');
@@ -31,11 +33,13 @@ export default function App() {
       setCidade(localidade || '');
       setBairro(bairro || '');
       setEstado(estado || '');
+      setLoading(false);
     }
     recarregarDados();
   }, []);
 
   async function Carregar() {
+    setLoading(true);
     let response = await api.get(`${url}/json`);
     let { cep, localidade, bairro, logradouro, estado } = response.data;
     setCEP(cep);
@@ -50,47 +54,71 @@ export default function App() {
     await AsyncStorage.setItem('Cidade', localidade || '');
     await AsyncStorage.setItem('Bairro', bairro || '');
     await AsyncStorage.setItem('Estado', estado || '');
+    setLoading(false);
   }
 
-  return (
-    <SafeAreaView style={styles.container}>
-      <Text style={styles.titulo}>Digite o CEP desejado</Text>
-      <TextInput
-        keyboardType="numeric"
-        maxLength={8}
-        style={styles.input}
-        placeholder="Ex:79003144"
-        value={url}
-        onChangeText={v => {
-          setUrl(v);
-        }}
-      />
+  async function Limpar() {
+    await AsyncStorage.clear();
+    setCEP('');
+    setLog('');
+    setCidade('');
+    setBairro('');
+    setEstado('');
+  }
 
-      <View style={styles.areaBtn}>
-        <TouchableOpacity style={styles.buscar} onPress={Carregar}>
-          <Text style={styles.btn}>Buscar</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.limpar}>
-          <Text style={styles.btn}>Limpar</Text>
-        </TouchableOpacity>
+  if (loading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator color={'blue'} size={45} />
       </View>
+    );
+  } else {
+    return (
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.titulo}>Digite o CEP desejado</Text>
+        <TextInput
+          keyboardType="numeric"
+          maxLength={8}
+          style={styles.input}
+          placeholder="Ex:79003144"
+          value={url}
+          onChangeText={v => {
+            setUrl(v);
+          }}
+        />
 
-      <View style={styles.areaBusca}>
-        <Text style={styles.textoLocal}>CEP: {CEP}</Text>
-        <Text style={styles.textoLocal}>Logradouro: {log}</Text>
-        <Text style={styles.textoLocal}>Bairro: {Bairro}</Text>
-        <Text style={styles.textoLocal}>Cidade: {cidade}</Text>
-        <Text style={styles.textoLocal}>Estado: {Estado}</Text>
-      </View>
-    </SafeAreaView>
-  );
+        <View style={styles.areaBtn}>
+          <TouchableOpacity style={styles.buscar} onPress={Carregar}>
+            <Text style={styles.btn}>Buscar</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.limpar} onPress={Limpar}>
+            <Text style={styles.btn}>Limpar</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.areaBusca}>
+          <Text style={styles.textoLocal}>CEP: {CEP}</Text>
+          <Text style={styles.textoLocal}>Logradouro: {log}</Text>
+          <Text style={styles.textoLocal}>Bairro: {Bairro}</Text>
+          <Text style={styles.textoLocal}>Cidade: {cidade}</Text>
+          <Text style={styles.textoLocal}>Estado: {Estado}</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
+    backgroundColor: '#DDD',
+  },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#DDD',
   },
   titulo: {
