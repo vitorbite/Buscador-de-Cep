@@ -41,10 +41,15 @@ export default function App() {
 
   async function Carregar() {
     
+    if (url.length !== 8){
+      Alert.alert('[ERROR]', 'CEP inválido');
+      return;
+    }
     setLoading(true);
     let response = await api.get(`${url}/json`);
-    if (url.length !== 8 || !response.data) {
+    if (!response.data || !response.data.cep) {
       Alert.alert('[ERROR]', 'CEP inválido');
+      setLoading(false);
       return;
     }
     let { cep, localidade, bairro, logradouro, estado } = response.data;
@@ -70,6 +75,7 @@ export default function App() {
     setCidade('');
     setBairro('');
     setEstado('');
+    setUrl('');
   }
 
   if (loading) {
@@ -89,7 +95,7 @@ export default function App() {
           placeholder="Ex:79003144"
           value={url}
           onChangeText={v => {
-            setUrl(v);
+            setUrl(v.replace(/[^0-9 ]/g, ''));
           }}
         />
 
