@@ -7,6 +7,7 @@ import {
   Keyboard,
   SafeAreaView,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import api from './services/api';
@@ -39,8 +40,13 @@ export default function App() {
   }, []);
 
   async function Carregar() {
+    
     setLoading(true);
     let response = await api.get(`${url}/json`);
+    if (url.length !== 8 || !response.data) {
+      Alert.alert('[ERROR]', 'CEP inválido');
+      return;
+    }
     let { cep, localidade, bairro, logradouro, estado } = response.data;
     setCEP(cep);
     setLog(logradouro);
